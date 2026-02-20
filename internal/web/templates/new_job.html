@@ -1,0 +1,69 @@
+{{define "content"}}
+<h1>New Job</h1>
+
+<form method="post" action="/jobs/create" class="card">
+  <div class="grid">
+    <label>Name
+      <input name="name" required placeholder="4 Charles Prime Rib"/>
+    </label>
+
+    <label>Venue ID
+      <input name="venue_id" required placeholder="123"/>
+    </label>
+
+    <label>Party size
+      <input name="party_size" required type="number" min="1" max="20" value="{{.Job.PartySize}}"/>
+    </label>
+
+    <label>Reservation date
+      <input name="reservation_date" required type="date"/>
+    </label>
+
+    <label>Preferred times (comma-separated; HH:MM or HH:MM:SS)
+      <input name="preferred_times" required value="{{range $i,$t := .Job.PreferredTimes}}{{if $i}}, {{end}}{{$t}}{{end}}"/>
+    </label>
+
+    <label>Reservation types (advanced; pass-through to resy-cli)
+      <input name="reservation_types" value="{{.Job.ReservationTypes}}" placeholder=""/>
+    </label>
+
+    <label>Timezone
+      <input name="timezone" value="{{.Job.Timezone}}" placeholder="America/New_York"/>
+    </label>
+
+    <label>Interval seconds (retry every N seconds)
+      <input name="interval_seconds" type="number" min="1" max="300" value="{{.Job.IntervalSec}}"/>
+    </label>
+  </div>
+
+  <h2 class="section">Optimal attempt window</h2>
+  <p class="hint">
+    Many restaurants open slots <em>N days out</em> at a fixed local time. Enter that rule and we will compute the attempt window.
+  </p>
+
+  <div class="grid">
+    <label>Days out (lead time)
+      <input name="days_out" type="number" min="0" max="365" value="30"/>
+    </label>
+
+    <label>Release time (local to timezone)
+      <input name="release_time" value="00:00" placeholder="00:00"/>
+    </label>
+
+    <label>Lead minutes (start before release)
+      <input name="lead_minutes" type="number" min="0" max="120" value="5"/>
+    </label>
+
+    <label>Window minutes (run after release)
+      <input name="window_minutes" type="number" min="1" max="120" value="20"/>
+    </label>
+  </div>
+
+  <button type="submit">Create job</button>
+</form>
+
+<p class="hint">
+  You must have valid resy-cli credentials configured in the runtime environment (see README).
+  The scheduler runs <code>resy ping</code> then tries <code>resy book</code> over your preferred times.
+</p>
+{{end}}

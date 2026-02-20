@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resysched
+  namespace: resysched
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: resysched
+  template:
+    metadata:
+      labels:
+        app: resysched
+    spec:
+      containers:
+        - name: resysched
+          image: localhost/resysched:dev
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: resysched-secret
+          env:
+            - name: LISTEN_ADDR
+              value: ":8080"
+            - name: BASE_URL
+              value: "http://resysched.resysched.svc.cluster.local:8080"
+            - name: SCHED_POLL_SECONDS
+              value: "2"
+            - name: RESY_BIN
+              value: "resy"
+            - name: HOME
+              value: "/data/resy"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 2
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          volumeMounts:
+            # You must provide resy-cli credential files in this directory (Secret, PVC, etc.)
+            - name: resy-creds
+              mountPath: /data/resy
+      volumes:
+        - name: resy-creds
+          emptyDir: {}

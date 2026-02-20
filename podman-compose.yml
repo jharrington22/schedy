@@ -1,0 +1,33 @@
+version: "3.8"
+services:
+  db:
+    image: docker.io/postgres:16
+    environment:
+      POSTGRES_USER: resy
+      POSTGRES_PASSWORD: resy
+      POSTGRES_DB: resy
+    ports:
+      - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Containerfile.dev
+    env_file:
+      - .env
+    environment:
+      # keep creds in a mounted directory
+      HOME: /data/resy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/workspace:Z
+      - ./.resy:/data/resy:Z
+    depends_on:
+      - db
+    command: ["/bin/sh", "-lc", "go run . server --migrate=true"]
+
+volumes:
+  dbdata: {}
