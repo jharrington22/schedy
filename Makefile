@@ -2,7 +2,7 @@ APP_NAME := resysched
 BIN_DIR := bin
 GO := go
 
-.PHONY: build clean test deps run keys
+.PHONY: build clean test deps run
 
 deps:
 	$(GO) mod tidy
@@ -19,6 +19,3 @@ test:
 
 clean:
 	rm -rf $(BIN_DIR)
-
-keys: build
-	./$(BIN_DIR)/$(APP_NAME) keys
