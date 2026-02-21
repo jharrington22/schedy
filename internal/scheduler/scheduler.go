@@ -1,22 +1,20 @@
 package scheduler
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"log"
-	"os/exec"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/example/resy-scheduler/internal/jobs"
+	"github.com/example/resy-scheduler/internal/resy"
 )
 
-// Scheduler polls for due jobs and invokes resy-cli to attempt booking.
+// Scheduler polls for due jobs and attempts booking via the Resy API.
 type Scheduler struct {
 	Repo     *jobs.Repo
-	ResyBin  string
+	Resy     *resy.Client
 	Interval time.Duration
 
 	mu sync.Mutex
@@ -65,30 +63,20 @@ func (s *Scheduler) tick(ctx context.Context) {
 }
 
 func (s *Scheduler) runJobAttempt(ctx context.Context, j jobs.Job) {
-	// Ping first (recommended by resy-cli README)
-	if out, err := s.exec(ctx, s.ResyBin, "ping"); err != nil {
-		msg := fmt.Sprintf("resy ping failed: %v; out=%s", err, out)
-		_ = s.Repo.MarkAttempt(ctx, j.ID, "ping", false, out, &msg)
+	// Ping first (recommended by resy-cli docs / standard troubleshooting)
+	if err := s.Resy.Ping(ctx); err != nil {
+		msg := fmt.Sprintf("resy ping failed: %v", err)
+		_ = s.Repo.MarkAttempt(ctx, j.ID, "ping", false, "", &msg)
 		return
 	}
 
-	for _, t := range j.PreferredTimes {
-		args := []string{
-			"book",
-			fmt.Sprintf("--partySize=%d", j.PartySize),
-			fmt.Sprintf("--reservationDate=%s", j.ReservationDate.Format("2006-01-02")),
-			fmt.Sprintf("--reservationTimes=%s", t),
-			fmt.Sprintf("--venueId=%s", j.VenueID),
-			fmt.Sprintf("--reservationTypes=%s", j.ReservationTypes),
-		}
-		out, err := s.exec(ctx, s.ResyBin, args...)
-		if err == nil {
-			_ = s.Repo.MarkAttempt(ctx, j.ID, t, true, out, nil)
-			return
-		}
-		msg := fmt.Sprintf("book failed for time=%s: %v", t, err)
-		_ = s.Repo.MarkAttempt(ctx, j.ID, t, false, out, &msg)
-		// continue to next time
+	// Book will try preferred times in order and return nil on first success.
+	if err := s.Resy.Book(ctx, j.VenueID, j.PartySize, j.ReservationDate, j.PreferredTimes, j.ReservationTypes); err == nil {
+		_ = s.Repo.MarkAttempt(ctx, j.ID, "book", true, "booked", nil)
+		return
+	} else {
+		msg := fmt.Sprintf("book failed: %v", err)
+		_ = s.Repo.MarkAttempt(ctx, j.ID, "book", false, "", &msg)
 	}
 
 	// If we're past the window, mark failed.
@@ -98,22 +86,3 @@ func (s *Scheduler) runJobAttempt(ctx context.Context, j jobs.Job) {
 	}
 }
 
-func (s *Scheduler) exec(ctx context.Context, bin string, args ...string) (string, error) {
-	// protect against hanging calls
-	cctx, cancel := context.WithTimeout(ctx, 20*time.Second)
-	defer cancel()
-
-	cmd := exec.CommandContext(cctx, bin, args...) //nolint:gosec
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	out := strings.TrimSpace(stdout.String() + "\n" + stderr.String())
-	if cctx.Err() == context.DeadlineExceeded {
-		return out, fmt.Errorf("timeout")
-	}
-	if err != nil {
-		return out, err
-	}
-	return out, nil
-}

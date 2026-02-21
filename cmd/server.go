@@ -6,12 +6,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/example/resy-scheduler/internal/auth"
 	"github.com/example/resy-scheduler/internal/config"
 	"github.com/example/resy-scheduler/internal/db"
 	"github.com/example/resy-scheduler/internal/jobs"
 	"github.com/example/resy-scheduler/internal/migrate"
+	"github.com/example/resy-scheduler/internal/resy"
 	"github.com/example/resy-scheduler/internal/scheduler"
 	"github.com/example/resy-scheduler/internal/web"
 	"github.com/spf13/cobra"
@@ -52,13 +54,14 @@ func newServerCmd() *cobra.Command {
 			jobRepo := jobs.NewRepo(d)
 
 			// scheduler
+			resyClient := resy.New(resy.Credentials{APIKey: cfg.ResyAPIKey, AuthToken: cfg.ResyAuthToken})
 			s := &scheduler.Scheduler{
 				Repo:     jobRepo,
-				ResyBin:  cfg.ResyBin,
+				Resy:     resyClient,
 				Interval: cfg.PollInterval,
 			}
 			go func() { _ = s.Run(ctx) }()
-			fmt.Printf("Configured listen addr: %s\n", cfg.ListenAddr)
+
 			// web
 			ws := &web.Server{Auth: authStore, Jobs: jobRepo, BaseURL: cfg.BaseURL}
 			return web.Start(ctx, cfg.ListenAddr, ws.Routes())

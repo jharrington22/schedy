@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   venue_id         TEXT NOT NULL,
   party_size       INT NOT NULL CHECK (party_size >= 1 AND party_size <= 20),
   reservation_date DATE NOT NULL,
-  preferred_times  TEXT NOT NULL, -- comma-separated HH:MM:SS (resy-cli expects seconds)
+  preferred_times  TEXT NOT NULL, -- comma-separated HH:MM:SS
   reservation_types TEXT NOT NULL DEFAULT '',
 
   timezone         TEXT NOT NULL DEFAULT 'America/New_York',

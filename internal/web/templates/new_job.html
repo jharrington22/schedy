@@ -23,7 +23,7 @@
       <input name="preferred_times" required value="{{range $i,$t := .Job.PreferredTimes}}{{if $i}}, {{end}}{{$t}}{{end}}"/>
     </label>
 
-    <label>Reservation types (advanced; pass-through to resy-cli)
+    <label>Reservation types (advanced)
       <input name="reservation_types" value="{{.Job.ReservationTypes}}" placeholder=""/>
     </label>
 
@@ -63,7 +63,7 @@
 </form>
 
 <p class="hint">
-  You must have valid resy-cli credentials configured in the runtime environment (see README).
-  The scheduler runs <code>resy ping</code> then tries <code>resy book</code> over your preferred times.
+  You must have valid Resy credentials configured in the runtime environment (see README).
+  The scheduler pings Resy then attempts to book over your preferred times.
 </p>
 {{end}}

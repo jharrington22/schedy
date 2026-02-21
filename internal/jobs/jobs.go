@@ -41,7 +41,7 @@ func parseTimes(s string) []string {
 		if p == "" {
 			continue
 		}
-		// normalize to HH:MM:SS (resy-cli README uses seconds, e.g. 18:15:00)
+		// normalize to HH:MM:SS (Resy slot times include seconds, e.g. 18:15:00)
 		if len(p) == 5 {
 			p = p + ":00"
 		}

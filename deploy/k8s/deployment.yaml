@@ -27,10 +27,8 @@ spec:
               value: "http://resysched.resysched.svc.cluster.local:8080"
             - name: SCHED_POLL_SECONDS
               value: "2"
-            - name: RESY_BIN
-              value: "resy"
-            - name: HOME
-              value: "/data/resy"
+
+            # RESY_API_KEY and RESY_AUTH_TOKEN should be provided via resysched-secret (envFrom).
           ports:
             - containerPort: 8080
           readinessProbe:
@@ -45,10 +43,5 @@ spec:
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
-          volumeMounts:
-            # You must provide resy-cli credential files in this directory (Secret, PVC, etc.)
-            - name: resy-creds
-              mountPath: /data/resy
-      volumes:
-        - name: resy-creds
-          emptyDir: {}
+
+      # No volumes required by default.

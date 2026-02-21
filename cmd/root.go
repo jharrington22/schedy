@@ -16,7 +16,7 @@ var (
 func NewRootCmd() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "resysched",
-		Short: "Reservation scheduler + web UI that orchestrates resy-cli booking attempts",
+		Short: "Reservation scheduler + web UI that books Resy reservations during an optimal window",
 	}
 
 	root.AddCommand(newVersionCmd())

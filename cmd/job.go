@@ -120,7 +120,7 @@ func newJobCreateCmd() *cobra.Command {
 	c.Flags().IntVar(&partySize, "party-size", 2, "party size")
 	c.Flags().StringVar(&resDate, "reservation-date", "", "reservation date YYYY-MM-DD")
 	c.Flags().StringVar(&preferredTimes, "preferred-times", "19:00,19:15,18:45", "comma-separated times (HH:MM or HH:MM:SS)")
-	c.Flags().StringVar(&resTypes, "reservation-types", "", "pass-through reservationTypes for resy-cli")
+	c.Flags().StringVar(&resTypes, "reservation-types", "", "optional reservation types (comma-separated)")
 	c.Flags().StringVar(&timezone, "timezone", "America/New_York", "timezone used for window math")
 	c.Flags().IntVar(&daysOut, "days-out", 30, "days in advance when slots open")
 	c.Flags().StringVar(&releaseTime, "release-time", "00:00", "local release time HH:MM")

@@ -16,7 +16,8 @@ type Config struct {
 
 	// scheduler
 	PollInterval time.Duration
-	ResyBin      string
+	ResyAPIKey    string
+	ResyAuthToken string
 }
 
 func FromEnv() (Config, error) {
@@ -24,7 +25,11 @@ func FromEnv() (Config, error) {
 		ListenAddr:  getenv("LISTEN_ADDR", ":8080"),
 		BaseURL:     getenv("BASE_URL", "http://localhost:8080"),
 		DatabaseURL: getenv("DATABASE_URL", "postgres://resy:resy@localhost:5432/resy?sslmode=disable"),
-		ResyBin:     getenv("RESY_BIN", "resy"),
+		ResyAPIKey:    os.Getenv("RESY_API_KEY"),
+		ResyAuthToken: os.Getenv("RESY_AUTH_TOKEN"),
+	}
+	if cfg.ResyAPIKey == "" || cfg.ResyAuthToken == "" {
+		return Config{}, fmt.Errorf("RESY_API_KEY and RESY_AUTH_TOKEN are required")
 	}
 
 	pollSec, err := strconv.Atoi(getenv("SCHED_POLL_SECONDS", "2"))
