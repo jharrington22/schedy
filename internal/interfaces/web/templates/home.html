@@ -1,0 +1,11 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Home</title></head>
+<body>
+<p><a href="/logout">Logout</a> | <a href="/credentials">Credentials</a></p>
+<h2>Account</h2>
+<ul>
+  <li>Resy credentials: {{if .HasResy}}✅ saved{{else}}❌ not set{{end}}</li>
+  <li>OpenTable credentials: {{if .HasOpenTable}}✅ saved{{else}}❌ not set{{end}}</li>
+</ul>
+<p>This build focuses on per-user credential storage/validation. Booking UI/scheduler can be added on top.</p>
+</body></html>

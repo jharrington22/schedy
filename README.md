@@ -1,34 +1,34 @@
-# resy-scheduler (DDD-style refactor scaffold) — Go 1.25.5
+# resy-scheduler — per-user provider credentials (Go 1.25.5)
 
-This tarball refactors the project into a **domain-first (DDD-style)** layout.
+This build adds **per-user** Resy/OpenTable credential storage with a simple UI.
 
-## Layout
-- `internal/domain/...` — business concepts and rules (no HTTP/DB knowledge)
-- `internal/application/...` — use cases and orchestration (calls domain interfaces)
-- `internal/infrastructure/...` — external systems (OpenTable/Resy HTTP, DB, config)
-- `internal/interfaces/...` — adapters (CLI, Web) translating inputs into use cases
-- `cmd/resysched` — binary entrypoint
+## What you get
+- Username/password login
+- On login, the app checks whether you have provider credentials in the DB
+  - If missing, you are redirected to `/credentials`
+  - If present, you go to `/`
+- Credentials are stored **encrypted in Postgres** (AES-256-GCM) using `CRED_ENC_KEY`
 
-## What works now
-- Provider interface in domain
-- Strict time ordering selector: `domain/reservation/ChooseSlotStrict`
-- OpenTable provider embedded (no shell-out) behind domain interface
-- `resysched ping opentable` (requires `OPENTABLE_TOKEN`)
-
-## What is TODO
-- Full web UI + auth + persistence + scheduler loop
-- Embedded Resy provider implementation (no shell-out)
-
-## Quick start (podman)
+## Run locally (podman)
 ```bash
 cp .env.example .env
-# set OPENTABLE_TOKEN and BOOKING_* if you want to call Book later
 podman-compose up --build
-podman-compose exec app sh -lc 'go run ./cmd/resysched ping opentable'
 ```
 
-## Build locally
+Create a user (from another terminal):
 ```bash
-make build
-./bin/resysched ping opentable
+make user-add USERNAME=james PASSWORD='changeme-now'
 ```
+
+Open:
+- http://localhost:8080/login
+
+## Getting the tokens (short version shown in the UI too)
+- **Resy**: log into resy.com → DevTools → Network → click request to `api.resy.com` → copy `Authorization` token and API key header (often `x-api-key`).
+- **OpenTable**: log into opentable.com → DevTools → Network → click request to `/dapi` → copy `x-csrf-token` header.
+
+> You only need to do this once per user; it’s saved in the database and the app only asks again if missing.
+
+## Production notes
+- Put `DATABASE_URL`, session keys, and `CRED_ENC_KEY` into Kubernetes Secrets.
+- If you change `CRED_ENC_KEY`, previously stored credentials cannot be decrypted.

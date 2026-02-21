@@ -1,21 +1,27 @@
 version: "3.9"
 services:
+  db:
+    image: docker.io/postgres:16-alpine
+    environment:
+      - POSTGRES_USER=resy
+      - POSTGRES_PASSWORD=resy
+      - POSTGRES_DB=resy
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data:Z
   app:
     build:
       context: .
       dockerfile: Containerfile.dev
     working_dir: /workspace
+    depends_on:
+      - db
     volumes:
       - .:/workspace:Z
     ports:
       - "8080:8080"
-    environment:
-      - PORT=8080
-      - OPENTABLE_TOKEN=${OPENTABLE_TOKEN}
-      - OPENTABLE_PERSISTED_QUERY_SHA256=${OPENTABLE_PERSISTED_QUERY_SHA256}
-      - BOOKING_FIRST_NAME=${BOOKING_FIRST_NAME}
-      - BOOKING_LAST_NAME=${BOOKING_LAST_NAME}
-      - BOOKING_EMAIL=${BOOKING_EMAIL}
-      - BOOKING_PHONE=${BOOKING_PHONE}
-      - RESY_API_KEY=${RESY_API_KEY}
-      - RESY_AUTH_TOKEN=${RESY_AUTH_TOKEN}
+    env_file:
+      - .env
+volumes:
+  pgdata: {}

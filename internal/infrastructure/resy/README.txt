@@ -1,0 +1,1 @@
+Resy provider implementation goes here (not required for credential UI feature).
