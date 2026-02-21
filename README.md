@@ -32,6 +32,7 @@ A small Go service that provides:
 ### 1) Generate cookie keys
 
 ```bash
+make deps   # fetches Go modules and writes go.sum (first time only)
 go run . keys
 # copy/paste the exports into your shell
 ```

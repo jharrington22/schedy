@@ -16,25 +16,32 @@ help:
 	@echo "  make podman-down     podman-compose down -v"
 	@echo "  make image           Build container image"
 	@echo "  make deploy          kubectl apply -f deploy/k8s"
+	@echo "  make deps            Fetch/tidy Go dependencies (writes go.sum)"
 
 $(BIN_DIR):
 	@mkdir -p $(BIN_DIR)
 
 .PHONY: build
-build: $(BIN_DIR)
-	$(GO) build -o $(BIN_DIR)/$(APP_NAME) ./...
+build: deps $(BIN_DIR)
+	$(GO) build -o $(BIN_DIR)/$(APP_NAME) .	
 
 .PHONY: test
-test:
+
+test: deps
 	$(GO) test ./...
 
 .PHONY: run
-run:
+
+run: deps
 	$(GO) run . server --migrate=true
 
 .PHONY: keys
-keys:
+keys: deps
 	$(GO) run . keys
+
+.PHONY: deps
+deps:
+	$(GO) mod tidy
 
 .PHONY: user-add
 user-add: build
@@ -56,3 +63,7 @@ image:
 .PHONY: deploy
 deploy:
 	kubectl apply -f deploy/k8s
+
+.PHONY: db/login
+db/login:
+	podman exec -it psql-cs bash -c "psql -h localhost -U $(USERNAME) resy"`

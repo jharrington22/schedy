@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/example/resy-scheduler/internal/auth"
 	"github.com/example/resy-scheduler/internal/config"
@@ -59,7 +58,7 @@ func newServerCmd() *cobra.Command {
 				Interval: cfg.PollInterval,
 			}
 			go func() { _ = s.Run(ctx) }()
-
+			fmt.Printf("Configured listen addr: %s\n", cfg.ListenAddr)
 			// web
 			ws := &web.Server{Auth: authStore, Jobs: jobRepo, BaseURL: cfg.BaseURL}
 			return web.Start(ctx, cfg.ListenAddr, ws.Routes())

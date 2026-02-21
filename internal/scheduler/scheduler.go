@@ -108,8 +108,7 @@ func (s *Scheduler) exec(ctx context.Context, bin string, args ...string) (strin
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	err := cmd.Run()
-	out := strings.TrimSpace(stdout.String() + "
-" + stderr.String())
+	out := strings.TrimSpace(stdout.String() + "\n" + stderr.String())
 	if cctx.Err() == context.DeadlineExceeded {
 		return out, fmt.Errorf("timeout")
 	}

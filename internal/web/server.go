@@ -41,8 +41,7 @@ func (s *Server) Routes() http.Handler {
 
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("ok
-"))
+		_, _ = w.Write([]byte("ok\n"))
 	})
 
 	mux.HandleFunc("/login", s.handleLogin)
