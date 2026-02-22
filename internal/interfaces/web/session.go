@@ -8,9 +8,7 @@ import (
 
 const sessionName = "resysched_session"
 
-type SessionManager struct {
-	sc *securecookie.SecureCookie
-}
+type SessionManager struct{ sc *securecookie.SecureCookie }
 
 func NewSessionManager(hashKey, blockKey []byte) *SessionManager {
 	return &SessionManager{sc: securecookie.New(hashKey, blockKey)}

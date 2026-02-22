@@ -5,9 +5,10 @@ import "time"
 type Credentials struct {
 	UserID string
 
-	ResyAPIKey      string
-	ResyAuthToken   string
-	OpenTableToken  string
+	ResyAPIKey     string
+	ResyAuthToken  string
+	OpenTableToken string
+
 	OpenTablePQHash string // optional override
 
 	CreatedAt time.Time

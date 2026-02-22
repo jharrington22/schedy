@@ -10,15 +10,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthService struct {
-	Users *postgres.UserRepo
-}
+type AuthService struct{ Users *postgres.UserRepo }
 
 func (a AuthService) VerifyPassword(ctx context.Context, username, password string) (user.User, error) {
 	u, err := a.Users.GetByUsername(ctx, username)
-	if err != nil {
-		return user.User{}, err
-	}
+	if err != nil { return user.User{}, err }
 	if err := bcrypt.CompareHashAndPassword(u.PasswordHash, []byte(password)); err != nil {
 		return user.User{}, fmt.Errorf("invalid credentials")
 	}

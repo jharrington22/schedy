@@ -7,7 +7,7 @@ services:
       - POSTGRES_PASSWORD=resy
       - POSTGRES_DB=resy
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data:Z
   app:
@@ -20,7 +20,7 @@ services:
     volumes:
       - .:/workspace:Z
     ports:
-      - "8080:8080"
+      - "8082:8080"
     env_file:
       - .env
 volumes:

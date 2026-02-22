@@ -5,19 +5,15 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/spf13/cobra"
-
 	"github.com/example/resy-scheduler/internal/application/usecases"
 	"github.com/example/resy-scheduler/internal/infrastructure/config"
 	"github.com/example/resy-scheduler/internal/infrastructure/postgres"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/spf13/cobra"
 )
 
 func NewUserCmd() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "user",
-		Short: "User management",
-	}
+	cmd := &cobra.Command{Use: "user", Short: "User management"}
 	cmd.AddCommand(newUserAddCmd())
 	return cmd
 }
@@ -37,11 +33,11 @@ func newUserAddCmd() *cobra.Command {
 			defer pool.Close()
 			if err := postgres.Migrate(ctx, pool); err != nil { return err }
 
-			users := postgres.NewUserRepo(pool)
+			repo := postgres.NewUserRepo(pool)
 			u, err := usecases.NewUser(username, password)
 			if err != nil { return err }
-			if err := users.Create(ctx, u); err != nil { return err }
-			_ = users.EnsureCredentialsRow(ctx, u.ID)
+			if err := repo.Create(ctx, u); err != nil { return err }
+			_ = repo.EnsureCredentialsRow(ctx, u.ID)
 			fmt.Println("created user:", u.Username)
 			return nil
 		},

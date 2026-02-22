@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/spf13/cobra"
-
 	"github.com/example/resy-scheduler/internal/application/usecases"
 	"github.com/example/resy-scheduler/internal/infrastructure/config"
 	"github.com/example/resy-scheduler/internal/infrastructure/crypto"
 	"github.com/example/resy-scheduler/internal/infrastructure/postgres"
 	"github.com/example/resy-scheduler/internal/interfaces/web"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/spf13/cobra"
 )
 
 func NewServerCmd() *cobra.Command {
@@ -35,16 +34,16 @@ func NewServerCmd() *cobra.Command {
 			aead, err := crypto.New(cfg.CredEncKey)
 			if err != nil { return err }
 
-			users := postgres.NewUserRepo(pool)
-			auth := usecases.AuthService{Users: users}
-			creds := usecases.CredentialsService{Users: users, AEAD: aead}
+			repo := postgres.NewUserRepo(pool)
+			_ = usecases.AuthService{Users: repo} // keep import stable
+			auth := usecases.AuthService{Users: repo}
+			creds := usecases.CredentialsService{Users: repo, AEAD: aead}
 
 			sessions := web.NewSessionManager(cfg.SessionHashKey, cfg.SessionBlockKey)
 			tmpl, err := web.ParseTemplates()
 			if err != nil { return err }
 
 			srv := web.New(cfg.HTTPAddr, sessions, auth, creds, tmpl)
-
 			fmt.Printf("HTTP listening on %s\n", cfg.HTTPAddr)
 			return srv.ListenAndServe()
 		},
